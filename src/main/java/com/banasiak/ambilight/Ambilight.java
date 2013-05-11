@@ -1,5 +1,8 @@
 package com.banasiak.ambilight;
 
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
+
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -8,16 +11,26 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Enumeration;
 
 public class Ambilight
 {
+    private static final int SERIAL_PORT_TIMEOUT = 2000;
+    private static final int SERIAL_PORT_DATA_RATE = 9600;
+
+    private static SerialPort serialPort = null;
+    private static BufferedReader input = null;
+    private static OutputStream output = null;
+
+    private static String serialPortName = "/dev/ttyACM0";
+    private static int sampleResolution = 2;
+
     private enum ScreenRegion
     {
-        LEFT,
-        RIGHT,
-        TOP,
-        BOTTOM
+        LEFT, RIGHT, TOP, BOTTOM
     }
 
     /**
@@ -25,31 +38,62 @@ public class Ambilight
      */
     public static void main(String[] args)
     {
-        final int sampleResolution = 2;
+        if (args.length == 2)
+        {
+            System.out.println("arg0 = " + args[0]);
+            System.out.println("arg1 = " + args[1]);
+
+            serialPortName = args[0];
+            sampleResolution = Integer.parseInt(args[1]);
+        }
+
+        if( !initializeSerialPort() )
+        {
+            return;
+        }
 
         try
         {
             final Robot robot = new Robot();
-            final Dimension screenDimension = Toolkit.getDefaultToolkit().getScreenSize();
+            final Dimension screenDimension = Toolkit.getDefaultToolkit()
+                .getScreenSize();
 
-            final Rectangle regionLeftRectangle = createRectangle(screenDimension, ScreenRegion.LEFT);
-            final Rectangle regionRightRectangle = createRectangle(screenDimension, ScreenRegion.RIGHT);
+            final Rectangle regionLeftRectangle = createRectangle(
+                screenDimension, ScreenRegion.LEFT);
+            final Rectangle regionRightRectangle = createRectangle(
+                screenDimension, ScreenRegion.RIGHT);
 
             Color regionLeftColor;
             Color regionRightColor;
 
-            while(true)
+            while (true)
             {
-                regionLeftColor = sampleRectangle(robot, regionLeftRectangle, sampleResolution);
-                System.out.println("Region: LEFT | Color: " + regionLeftColor.toString());
+                regionLeftColor = sampleRectangle(robot, regionLeftRectangle,
+                    sampleResolution);
+                regionRightColor = sampleRectangle(robot, regionRightRectangle,
+                    sampleResolution);
 
-                regionRightColor = sampleRectangle(robot, regionRightRectangle, sampleResolution);
-                System.out.println("Region: RIGHT | Color: " + regionRightColor.toString());
-
+                System.out.println("Region: LEFT | Color: "
+                    + regionLeftColor.toString());
+                System.out.println("Region: RIGHT | Color: "
+                    + regionRightColor.toString());
                 System.out.println("");
+
+                // write marker for synchronization
+                output.write(0xff);
+
+                // RGB colors for left region
+                output.write(regionLeftColor.getRed());
+                output.write(regionLeftColor.getGreen());
+                output.write(regionLeftColor.getBlue());
+
+                // RGB colors for right region
+                output.write(regionRightColor.getRed());
+                output.write(regionRightColor.getGreen());
+                output.write(regionRightColor.getBlue());
+
                 Thread.sleep(10);
             }
-
 
         }
         catch (final AWTException e)
@@ -62,11 +106,57 @@ public class Ambilight
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
+        catch (final IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
     }
 
-    private static Rectangle createRectangle(Dimension screenDimension, ScreenRegion region)
+    private static boolean initializeSerialPort()
+    {
+        CommPortIdentifier portId = null;
+        final Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier
+            .getPortIdentifiers();
+
+        while (portEnum.hasMoreElements())
+        {
+            final CommPortIdentifier currentPortId = portEnum.nextElement();
+            if (currentPortId.getName().equals(serialPortName))
+            {
+                portId = currentPortId;
+                break;
+            }
+        }
+
+        if (portId == null)
+        {
+            System.out.println("Could not find COM port: " + serialPortName);
+            return false;
+        }
+
+        try
+        {
+            serialPort = (SerialPort) portId.open("Ambilight",
+                SERIAL_PORT_TIMEOUT);
+            serialPort.setSerialPortParams(SERIAL_PORT_DATA_RATE,
+                SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
+                SerialPort.PARITY_NONE);
+
+            output = serialPort.getOutputStream();
+
+        }
+        catch (final Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    private static Rectangle createRectangle(Dimension screenDimension,
+        ScreenRegion region)
     {
 
         final int width = (int) screenDimension.getWidth();
@@ -80,35 +170,36 @@ public class Ambilight
         {
             case LEFT:
                 rectangle = new Rectangle(0, 0, halfWidth, height);
-                break;
+            break;
             case RIGHT:
-                rectangle = new Rectangle(halfWidth+1, 0, halfWidth, height);
-                break;
+                rectangle = new Rectangle(halfWidth + 1, 0, halfWidth, height);
+            break;
             case TOP:
                 rectangle = new Rectangle(0, 0, width, halfHeight);
-                break;
+            break;
             case BOTTOM:
-                rectangle = new Rectangle(0, halfHeight+1, width, halfHeight);
-                break;
+                rectangle = new Rectangle(0, halfHeight + 1, width, halfHeight);
+            break;
 
         }
 
         return rectangle;
     }
 
-    private static Color sampleRectangle(final Robot robot, Rectangle region, int sampleResolution)
+    private static Color sampleRectangle(final Robot robot, Rectangle region,
+        int sampleResolution)
     {
-        int red=0;
-        int green=0;
-        int blue=0;
+        int red = 0;
+        int green = 0;
+        int blue = 0;
 
         final BufferedImage grid = robot.createScreenCapture(region);
         final Raster raster = grid.getData();
         int rgbArray[] = null;
 
-        for (int x=0; x < raster.getWidth(); x = x+sampleResolution)
+        for (int x = 0; x < raster.getWidth(); x = x + sampleResolution)
         {
-            for ( int y=0; y < raster.getHeight(); y = y+sampleResolution)
+            for (int y = 0; y < raster.getHeight(); y = y + sampleResolution)
             {
                 rgbArray = raster.getPixel(x, y, rgbArray);
                 red = red + rgbArray[0];
@@ -119,13 +210,22 @@ public class Ambilight
 
         // average color
         final int sampleArea = raster.getWidth() * raster.getHeight();
-        final int resolutionArea = sampleArea/sampleResolution;
+        final int resolutionArea = sampleArea / sampleResolution;
 
         red = red / resolutionArea;
         green = green / resolutionArea;
         blue = blue / resolutionArea;
 
         return new Color(red, green, blue);
+    }
+
+    public synchronized void closeSerialPort()
+    {
+        if (serialPort != null)
+        {
+            serialPort.removeEventListener();
+            serialPort.close();
+        }
     }
 
 }
