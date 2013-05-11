@@ -1,0 +1,51 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+
+task packageSources(type: Jar, dependsOn: classes) {
+  from project.sourceSets.main.allSource
+  classifier = 'sources'
+
+}
+task packageJavadocs(type: Jar, dependsOn: javadoc) {
+  from project.javadoc.destinationDir
+  classifier = 'javadoc' 
+}
+
+
+// eclipse
+eclipse.classpath.file 
+{
+  whenMerged 
+  {
+    classpath ->
+      classpath.entries.findAll 
+      {
+          entry -> entry.kind == 'output'
+      }*.path = 'build/classes'
+  }
+}
+
+
+
+// repos
+repositories {
+  mavenCentral()
+  flatDir {
+     dirs 'lib'
+  }
+}
+
+dependencies {
+//  compile       'org.txtx:rxtx:2.1.7'
+
+  // silly spock insists on pulling in "junit-dep-4.9" instead of "junit-4.9"
+  // testCompile   group: 'junit', name: 'junit', version: '4.9'
+}
+
+
+
+// bootstrap code for gradlew
+task wrapper(type: Wrapper) {
+  gradleVersion = '1.2'
+}

@@ -1,4 +1,4 @@
-package com.banasiak.java.ambilight;
+package com.banasiak.ambilight;
 
 import java.awt.AWTException;
 import java.awt.Color;
