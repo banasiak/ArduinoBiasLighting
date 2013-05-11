@@ -1,8 +1,8 @@
 
 ### Introduction
 
-The project uses 'gradlew' - i.e. the gradle-wrapper
-You can either install and use 'gradle', or you can use the included 'gradlew'
+The project uses 'gradlew' - i.e. the gradle-wrapper.
+You can either install and use 'gradle', or you can use the included 'gradlew'.
 
 
 ### Command-line Compiling
@@ -16,8 +16,8 @@ To set up this project in Eclipse, run:
 
 $ ./gradlew eclipse
 
-Then in eclipse, run File->Import->Existing Projects into Workspace
-  select the folder that contains the folder 'ArdunioBiasLighting'
+Then in Eclipse, run File->Import->Existing Projects into Workspace.
+  Select the folder that contains the folder 'ArdunioBiasLighting'.
   You now have a project called ArduinoBiasLighting.
 
 
