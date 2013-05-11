@@ -38,9 +38,9 @@ repositories {
 
 dependencies {
     compile  "RXTXcomm:RXTXcomm"
-// this also works:
+// these also work:
 //tt//    compile fileTree('lib').include('**/*.jar')
-
+//rb//  compile files('lib/RXTXcomm.jar')
 
   // silly spock insists on pulling in "junit-dep-4.9" instead of "junit-4.9"
   // testCompile   group: 'junit', name: 'junit', version: '4.9'
