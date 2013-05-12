@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
 
+import com.banasiak.ambilight.Config.ScreenRegion;
+
 public class Ambilight
 {
     private static final int SERIAL_PORT_TIMEOUT = 2000;
@@ -27,10 +29,7 @@ public class Ambilight
 
     static Config config = new Config();
 
-    private enum ScreenRegion
-    {
-        LEFT, RIGHT, TOP, BOTTOM
-    }
+
 
     /**
      * @param args
@@ -38,7 +37,7 @@ public class Ambilight
     public static void main(String[] args)
     {
 
-        if( !initializeSerialPort() )
+        if (!initializeSerialPort())
         {
             return;
         }
@@ -54,15 +53,17 @@ public class Ambilight
             final Rectangle regionRightRectangle = createRectangle(
                 screenDimension, ScreenRegion.RIGHT);
 
+            final int sampleResolution = config.getSampleResolution();
+
             Color regionLeftColor;
             Color regionRightColor;
 
             while (true)
             {
                 regionLeftColor = sampleRectangle(robot, regionLeftRectangle,
-                    config.getSampleResolution());
+                    sampleResolution);
                 regionRightColor = sampleRectangle(robot, regionRightRectangle,
-                    config.getSampleResolution());
+                    sampleResolution);
 
                 System.out.println("Region: LEFT | Color: "
                     + regionLeftColor.toString());
@@ -207,12 +208,6 @@ public class Ambilight
         red = red / resolutionArea;
         green = green / resolutionArea;
         blue = blue / resolutionArea;
-
-        // red hack for prototype
-        if( red < 127 )
-        {
-            red = red * 2;
-        }
 
         return new Color(red, green, blue);
     }
