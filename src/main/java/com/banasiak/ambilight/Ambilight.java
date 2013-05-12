@@ -25,8 +25,7 @@ public class Ambilight
     private static BufferedReader input = null;
     private static OutputStream output = null;
 
-    private static String serialPortName = "/dev/ttyACM0";
-    private static int sampleResolution = 2;
+    static Config config = new Config();
 
     private enum ScreenRegion
     {
@@ -38,14 +37,6 @@ public class Ambilight
      */
     public static void main(String[] args)
     {
-        if (args.length == 2)
-        {
-            System.out.println("arg0 = " + args[0]);
-            System.out.println("arg1 = " + args[1]);
-
-            serialPortName = args[0];
-            sampleResolution = Integer.parseInt(args[1]);
-        }
 
         if( !initializeSerialPort() )
         {
@@ -69,9 +60,9 @@ public class Ambilight
             while (true)
             {
                 regionLeftColor = sampleRectangle(robot, regionLeftRectangle,
-                    sampleResolution);
+                    config.getSampleResolution());
                 regionRightColor = sampleRectangle(robot, regionRightRectangle,
-                    sampleResolution);
+                    config.getSampleResolution());
 
                 System.out.println("Region: LEFT | Color: "
                     + regionLeftColor.toString());
@@ -116,6 +107,7 @@ public class Ambilight
 
     private static boolean initializeSerialPort()
     {
+        final String serialPortName = config.getSerialPort();
         CommPortIdentifier portId = null;
         final Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier
             .getPortIdentifiers();
@@ -215,6 +207,12 @@ public class Ambilight
         red = red / resolutionArea;
         green = green / resolutionArea;
         blue = blue / resolutionArea;
+
+        // red hack for prototype
+        if( red < 127 )
+        {
+            red = red * 2;
+        }
 
         return new Color(red, green, blue);
     }
