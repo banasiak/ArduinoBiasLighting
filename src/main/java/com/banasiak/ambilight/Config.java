@@ -52,6 +52,15 @@ public class Config
             .getProperty(CUSTOM_GREEN_KEY));
         this.customBlueValue = Integer.parseInt(prop
             .getProperty(CUSTOM_BLUE_KEY));
+
+        System.out.println(MODE_KEY + "=" + this.mode);
+        System.out.println(SERIAL_PORT_KEY + "=" + this.serialPort);
+        System.out.println(SAMPLE_RESOLUTION_KEY + "=" + this.sampleResolution);
+        System.out.println(REGION_ONE_KEY + "=" + this.region1.toString());
+        System.out.println(REGION_TWO_KEY + "=" + this.region2.toString());
+        System.out.println(CUSTOM_RED_KEY + "=" + this.customRedValue);
+        System.out.println(CUSTOM_GREEN_KEY + "=" + this.customGreenValue);
+        System.out.println(CUSTOM_BLUE_KEY + "=" + this.customBlueValue);
     }
 
     public Properties readProperties(String propFile)
@@ -63,6 +72,8 @@ public class Config
         catch (final FileNotFoundException e)
         {
             // file doesn't exist, make a new one with defaults
+            System.out.println(CONFIG_FILE
+                + " not found.  Creating with default values.");
             writeProperties(prop);
         }
         catch (final IOException e)
@@ -70,15 +81,6 @@ public class Config
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        System.out.println(MODE_KEY + "=" + this.mode);
-        System.out.println(SERIAL_PORT_KEY + "=" + this.serialPort);
-        System.out.println(SAMPLE_RESOLUTION_KEY + "=" + this.sampleResolution);
-        System.out.println(REGION_ONE_KEY + "=" + this.region1.toString());
-        System.out.println(REGION_TWO_KEY + "=" + this.region2.toString());
-        System.out.println(CUSTOM_RED_KEY + "=" + this.customRedValue);
-        System.out.println(CUSTOM_GREEN_KEY + "=" + this.customGreenValue);
-        System.out.println(CUSTOM_BLUE_KEY + "=" + this.customBlueValue);
 
         return prop;
     }

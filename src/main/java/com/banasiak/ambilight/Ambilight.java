@@ -201,9 +201,9 @@ public class Ambilight
             }
         }
 
-        // average color
+        // average color while compensating for the sampling resolution
         final int sampleArea = raster.getWidth() * raster.getHeight();
-        final int resolutionArea = sampleArea / sampleResolution;
+        final int resolutionArea = sampleArea / (sampleResolution * sampleResolution);
 
         red = red / resolutionArea;
         green = green / resolutionArea;
