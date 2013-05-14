@@ -18,10 +18,11 @@ int orange[3] = {237, 120, 6};
 
 // control input pins
 int powerControlPin = 2;
-int serialControlPin = 12;
+int modeControlPin = 12;
 
+// variables to store control input values
 int powerControlValue;
-int serialControlValue;
+int modeControlValue;
 
 // input pins
 int regionOneInputPins[NUM_INPUT_PINS] = {A0, A1, A2};
@@ -35,11 +36,12 @@ int regionTwoValues[NUM_INPUT_PINS] = {0, 0, 0};
 int regionOneOutputPins[NUM_OUTPUT_PINS] = {3, 5, 6};
 int regionTwoOutputPins[NUM_OUTPUT_PINS] = {9, 10, 11};
 
+
 void setup()
 {
   // set control pins to INPUT
   pinMode(powerControlPin, INPUT);
-  pinMode(serialControlPin, INPUT);
+  pinMode(modeControlPin, INPUT);
   
   // set region 1 & 2 input pins to INPUT
   for (int i=0; i<NUM_INPUT_PINS; i++)
@@ -59,29 +61,33 @@ void setup()
   Serial.begin(9600);
 }
 
+
 void loop()
 {
+  // read the values of the control pins
   powerControlValue = digitalRead(powerControlPin);
-  serialControlValue = digitalRead(serialControlPin);
+  modeControlValue = digitalRead(modeControlPin);
   
   if(powerControlValue == 0)
   {
+    // disable the LEDs
     illuminateLED(regionOneOutputPins, black);
     illuminateLED(regionTwoOutputPins, black);
   }
   else
   {
-    if(serialControlValue == 0)
-    {
+    if(modeControlValue == 0)
+    {      
       // control colors using DIP switches
       readInputValues(regionOneInputPins, regionOneValues);
-      setRegionOneLED();
+      setRegionColor(regionOneOutputPins, regionOneValues);
       
       readInputValues(regionTwoInputPins, regionTwoValues);
-      setRegionTwoLED(); 
+      setRegionColor(regionTwoOutputPins, regionTwoValues);
     }
     else
-    {
+    { 
+      // control the colors using the serial port
       if(Serial.available() >= 7)
       {
         if(Serial.read() == 0xff)
@@ -96,12 +102,11 @@ void loop()
       }
       illuminateLED(regionOneOutputPins, regionOneValues);
       illuminateLED(regionTwoOutputPins, regionTwoValues);
-      delay(10);
     } 
   } 
 }
-  
 
+  
 void readInputValues(int inputPins[], int inputValues[])
 {
   for (int i=0; i<NUM_INPUT_PINS; i++)
@@ -109,6 +114,7 @@ void readInputValues(int inputPins[], int inputValues[])
     inputValues[i] = digitalRead(inputPins[i]);
   }
 }
+
 
 void printValues(String arrayName, int array[], int arraySize)
 {
@@ -124,87 +130,52 @@ void printValues(String arrayName, int array[], int arraySize)
   Serial.println("");
 }
 
-void setRegionOneLED()
+
+void setRegionColor(int regionOutputPins[], int regionValues[])
 {
-    int regionOnePinTotal = (4 * regionOneValues[0]) + (2 * regionOneValues[1]) + (regionOneValues[2]);
-    switch(regionOnePinTotal)
+  // treat these 3 pins as binary input, do some clever math to see what the decimal value is
+  int regionPinTotal = (4 * regionValues[0]) + (2 * regionValues[1]) + (regionValues[2]);
+  
+  // set the color according to the total binary value of the 3 pins
+  switch(regionPinTotal)
     {
       case 0:
         //red
-        illuminateLED(regionOneOutputPins, blue);
+        illuminateLED(regionOutputPins, blue);
         break;
       case 1:
         //green
-        illuminateLED(regionOneOutputPins, green);
+        illuminateLED(regionOutputPins, green);
         break;
       case 2:
         //blue
-        illuminateLED(regionOneOutputPins, cyan);
+        illuminateLED(regionOutputPins, cyan);
         break;
       case 3:
         //yellow
-        illuminateLED(regionOneOutputPins, red);
+        illuminateLED(regionOutputPins, red);
         break;
       case 4:
         //purple
-        illuminateLED(regionOneOutputPins, magenta);
+        illuminateLED(regionOutputPins, magenta);
         break;
       case 5:
         //pink
-        illuminateLED(regionOneOutputPins, yellow);
+        illuminateLED(regionOutputPins, yellow);
         break;
       case 6:
         //orange
-        illuminateLED(regionOneOutputPins, orange);
+        illuminateLED(regionOutputPins, orange);
         break;
       case 7:
         //white
-        illuminateLED(regionOneOutputPins, white);
+        illuminateLED(regionOutputPins, white);
         break;  
     }
 }
 
-void setRegionTwoLED()
-{
-    int regionTwoPinTotal = (4 * regionTwoValues[0]) + (2 * regionTwoValues[1]) + (regionTwoValues[2]);
-    switch(regionTwoPinTotal)
-    {
-      case 0:
-        //red
-        illuminateLED(regionTwoOutputPins, blue);
-        break;
-      case 1:
-        //green
-        illuminateLED(regionTwoOutputPins, green);
-        break;
-      case 2:
-        //blue
-        illuminateLED(regionTwoOutputPins, cyan);
-        break;
-      case 3:
-        //yellow
-        illuminateLED(regionTwoOutputPins, red);
-        break;
-      case 4:
-        //purple
-        illuminateLED(regionTwoOutputPins, magenta);
-        break;
-      case 5:
-        //pink
-        illuminateLED(regionTwoOutputPins, yellow);
-        break;
-      case 6:
-        //orange
-        illuminateLED(regionTwoOutputPins, orange);
-        break;
-      case 7:
-        //white
-        illuminateLED(regionTwoOutputPins, white);
-        break;  
-    } 
-}
 
-void illuminateLED(int outputPins[3], int color[3])
+void illuminateLED(int outputPins[], int color[])
 {
   for(int i=0; i<NUM_OUTPUT_PINS; i++)
   {
