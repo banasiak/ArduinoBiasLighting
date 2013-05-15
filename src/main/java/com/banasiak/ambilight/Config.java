@@ -19,6 +19,7 @@ public class Config
     private int customRedValue = 127;
     private int customGreenValue = 127;
     private int customBlueValue = 127;
+    private boolean debug = false;
 
     private static String MODE_KEY = "mode";
     private static String SERIAL_PORT_KEY = "serialPort";
@@ -28,6 +29,7 @@ public class Config
     private static String CUSTOM_RED_KEY = "customRed";
     private static String CUSTOM_GREEN_KEY = "customGreen";
     private static String CUSTOM_BLUE_KEY = "customBlue";
+    private static String DEBUG_KEY = "debug";
 
     public enum ScreenRegion
     {
@@ -57,15 +59,22 @@ public class Config
             .getProperty(CUSTOM_GREEN_KEY));
         this.customBlueValue = Integer.parseInt(prop
             .getProperty(CUSTOM_BLUE_KEY));
+        this.debug = Boolean.valueOf(prop.getProperty(DEBUG_KEY));
 
-        System.out.println(MODE_KEY + "=" + this.mode.name());
-        System.out.println(SERIAL_PORT_KEY + "=" + this.serialPort);
-        System.out.println(SAMPLE_RESOLUTION_KEY + "=" + this.sampleResolution);
-        System.out.println(REGION_ONE_KEY + "=" + this.region1.name());
-        System.out.println(REGION_TWO_KEY + "=" + this.region2.name());
-        System.out.println(CUSTOM_RED_KEY + "=" + this.customRedValue);
-        System.out.println(CUSTOM_GREEN_KEY + "=" + this.customGreenValue);
-        System.out.println(CUSTOM_BLUE_KEY + "=" + this.customBlueValue);
+        if (debug)
+        {
+            System.out.println(MODE_KEY + "=" + this.mode.name());
+            System.out.println(SERIAL_PORT_KEY + "=" + this.serialPort);
+            System.out.println(SAMPLE_RESOLUTION_KEY + "="
+                + this.sampleResolution);
+            System.out.println(REGION_ONE_KEY + "=" + this.region1.name());
+            System.out.println(REGION_TWO_KEY + "=" + this.region2.name());
+            System.out.println(CUSTOM_RED_KEY + "=" + this.customRedValue);
+            System.out.println(CUSTOM_GREEN_KEY + "=" + this.customGreenValue);
+            System.out.println(CUSTOM_BLUE_KEY + "=" + this.customBlueValue);
+            System.out.println(DEBUG_KEY + "=" + this.debug);
+            System.out.println("");
+        }
     }
 
     public Properties readProperties(String propFile)
@@ -106,6 +115,7 @@ public class Config
                 String.valueOf(this.customGreenValue));
             prop.setProperty(CUSTOM_BLUE_KEY,
                 String.valueOf(this.customBlueValue));
+            prop.setProperty(DEBUG_KEY, String.valueOf(this.debug));
 
             prop.store(new FileOutputStream(CONFIG_FILE), null);
         }
@@ -157,6 +167,11 @@ public class Config
         return customBlueValue;
     }
 
+    public boolean getDebug()
+    {
+        return debug;
+    }
+
     // setters
     public void setMode(Mode mode)
     {
@@ -196,6 +211,11 @@ public class Config
     public void setCustomBlueValue(int customBlueValue)
     {
         this.customBlueValue = customBlueValue;
+    }
+
+    public void setDebug(boolean debug)
+    {
+        this.debug = debug;
     }
 
 }

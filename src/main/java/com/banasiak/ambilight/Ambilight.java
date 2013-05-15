@@ -46,15 +46,21 @@ public class Ambilight
 
         try
         {
+            // robot class for screen capturing
             final Robot robot = new Robot();
+
+            // get the screen size
             final Dimension screenDimension = Toolkit.getDefaultToolkit()
                 .getScreenSize();
 
+            // create rectangles for the each screen region as specified in the
+            // config file
             final Rectangle regionOneRectangle = createRectangle(
                 screenDimension, regionOne);
             final Rectangle regionTwoRectangle = createRectangle(
                 screenDimension, regionTwo);
 
+            // variables to hold the RGB color values for each region
             Color regionOneColor = new Color(0, 0, 0);
             Color regionTwoColor = new Color(0, 0, 0);
 
@@ -62,7 +68,8 @@ public class Ambilight
             // the serial port
             while (true)
             {
-                if(config.getMode() == Mode.DYNAMIC)
+                // sample the screen regions calculate the average color
+                if (config.getMode() == Mode.DYNAMIC)
                 {
                     regionOneColor = sampleRectangle(robot, regionOneRectangle,
                         sampleResolution);
@@ -70,7 +77,8 @@ public class Ambilight
                         sampleResolution);
                 }
 
-                if(config.getMode() == Mode.MANUAL)
+                // read the custom colors from the config file and use those
+                if (config.getMode() == Mode.MANUAL)
                 {
                     final int red = config.getCustomRedValue();
                     final int green = config.getCustomGreenValue();
@@ -80,15 +88,19 @@ public class Ambilight
                     regionTwoColor = new Color(red, green, blue);
                 }
 
+                if (config.getDebug())
+                {
+                    System.out.println("Region: " + regionOne.name()
+                        + " | Color: " + regionOneColor.toString());
+                    System.out.println("Region: " + regionTwo.name()
+                        + " | Color: " + regionTwoColor.toString());
+                    System.out.println("");
+                }
 
-                System.out.println("Region: " + regionOne.name()
-                    + " | Color: " + regionOneColor.toString());
-                System.out.println("Region: " + regionTwo.name()
-                    + " | Color: " + regionTwoColor.toString());
-                System.out.println("");
-
+                // write the appropriate region colors to the serial port
                 writeColorsToSerial(regionOneColor, regionTwoColor);
 
+                // give the system a breather
                 Thread.sleep(10);
             }
 
@@ -170,6 +182,15 @@ public class Ambilight
         return true;
     }
 
+    public synchronized void closeSerialPort()
+    {
+        if (serialPort != null)
+        {
+            serialPort.removeEventListener();
+            serialPort.close();
+        }
+    }
+
     private static Rectangle createRectangle(Dimension screenDimension,
         ScreenRegion region)
     {
@@ -215,7 +236,7 @@ public class Ambilight
         int blue = 0;
 
         // if the region rectangle is null, disable the LEDs by returning black
-        if(region == null)
+        if (region == null)
         {
             return new Color(red, green, blue);
         }
@@ -247,14 +268,4 @@ public class Ambilight
 
         return new Color(red, green, blue);
     }
-
-    public synchronized void closeSerialPort()
-    {
-        if (serialPort != null)
-        {
-            serialPort.removeEventListener();
-            serialPort.close();
-        }
-    }
-
 }
