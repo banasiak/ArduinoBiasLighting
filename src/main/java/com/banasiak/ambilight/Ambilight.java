@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
 
+import com.banasiak.ambilight.Config.Mode;
 import com.banasiak.ambilight.Config.ScreenRegion;
 
 public class Ambilight
@@ -29,13 +30,14 @@ public class Ambilight
 
     static Config config = new Config();
 
-
-
     /**
      * @param args
      */
     public static void main(String[] args)
     {
+        final ScreenRegion regionOne = config.getRegion1();
+        final ScreenRegion regionTwo = config.getRegion2();
+        final int sampleResolution = config.getSampleResolution();
 
         if (!initializeSerialPort())
         {
@@ -48,41 +50,44 @@ public class Ambilight
             final Dimension screenDimension = Toolkit.getDefaultToolkit()
                 .getScreenSize();
 
-            final Rectangle regionLeftRectangle = createRectangle(
-                screenDimension, ScreenRegion.LEFT);
-            final Rectangle regionRightRectangle = createRectangle(
-                screenDimension, ScreenRegion.RIGHT);
+            final Rectangle regionOneRectangle = createRectangle(
+                screenDimension, regionOne);
+            final Rectangle regionTwoRectangle = createRectangle(
+                screenDimension, regionTwo);
 
-            final int sampleResolution = config.getSampleResolution();
+            Color regionOneColor = new Color(0, 0, 0);
+            Color regionTwoColor = new Color(0, 0, 0);
 
-            Color regionLeftColor;
-            Color regionRightColor;
-
+            // main loop that samples the screen colors and writes the values to
+            // the serial port
             while (true)
             {
-                regionLeftColor = sampleRectangle(robot, regionLeftRectangle,
-                    sampleResolution);
-                regionRightColor = sampleRectangle(robot, regionRightRectangle,
-                    sampleResolution);
+                if(config.getMode() == Mode.DYNAMIC)
+                {
+                    regionOneColor = sampleRectangle(robot, regionOneRectangle,
+                        sampleResolution);
+                    regionTwoColor = sampleRectangle(robot, regionTwoRectangle,
+                        sampleResolution);
+                }
 
-                System.out.println("Region: LEFT | Color: "
-                    + regionLeftColor.toString());
-                System.out.println("Region: RIGHT | Color: "
-                    + regionRightColor.toString());
+                if(config.getMode() == Mode.MANUAL)
+                {
+                    final int red = config.getCustomRedValue();
+                    final int green = config.getCustomGreenValue();
+                    final int blue = config.getCustomBlueValue();
+
+                    regionOneColor = new Color(red, green, blue);
+                    regionTwoColor = new Color(red, green, blue);
+                }
+
+
+                System.out.println("Region: " + regionOne.name()
+                    + " | Color: " + regionOneColor.toString());
+                System.out.println("Region: " + regionTwo.name()
+                    + " | Color: " + regionTwoColor.toString());
                 System.out.println("");
 
-                // write marker for synchronization
-                output.write(0xff);
-
-                // RGB colors for left region
-                output.write(regionLeftColor.getRed());
-                output.write(regionLeftColor.getGreen());
-                output.write(regionLeftColor.getBlue());
-
-                // RGB colors for right region
-                output.write(regionRightColor.getRed());
-                output.write(regionRightColor.getGreen());
-                output.write(regionRightColor.getBlue());
+                writeColorsToSerial(regionOneColor, regionTwoColor);
 
                 Thread.sleep(10);
             }
@@ -104,6 +109,23 @@ public class Ambilight
             e.printStackTrace();
         }
 
+    }
+
+    private static void writeColorsToSerial(Color regionOneColor,
+        Color regionTwoColor) throws IOException
+    {
+        // write marker for synchronization
+        output.write(0xff);
+
+        // RGB colors for left region
+        output.write(regionOneColor.getRed());
+        output.write(regionOneColor.getGreen());
+        output.write(regionOneColor.getBlue());
+
+        // RGB colors for right region
+        output.write(regionTwoColor.getRed());
+        output.write(regionTwoColor.getGreen());
+        output.write(regionTwoColor.getBlue());
     }
 
     private static boolean initializeSerialPort()
@@ -173,6 +195,12 @@ public class Ambilight
             case BOTTOM:
                 rectangle = new Rectangle(0, halfHeight + 1, width, halfHeight);
             break;
+            case FULL:
+                rectangle = new Rectangle(0, 0, width, height);
+            break;
+            case DISABLED:
+                rectangle = null;
+            break;
 
         }
 
@@ -186,6 +214,13 @@ public class Ambilight
         int green = 0;
         int blue = 0;
 
+        // if the region rectangle is null, disable the LEDs by returning black
+        if(region == null)
+        {
+            return new Color(red, green, blue);
+        }
+
+        // otherwise, capture the screen region and sample the pixel colors
         final BufferedImage grid = robot.createScreenCapture(region);
         final Raster raster = grid.getData();
         int rgbArray[] = null;
@@ -203,7 +238,8 @@ public class Ambilight
 
         // average color while compensating for the sampling resolution
         final int sampleArea = raster.getWidth() * raster.getHeight();
-        final int resolutionArea = sampleArea / (sampleResolution * sampleResolution);
+        final int resolutionArea = sampleArea
+            / (sampleResolution * sampleResolution);
 
         red = red / resolutionArea;
         green = green / resolutionArea;

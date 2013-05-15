@@ -11,7 +11,7 @@ public class Config
     private static String CONFIG_FILE = "config.properties";
 
     // defaults
-    private String mode = "DYNAMIC";
+    private Mode mode = Mode.DYNAMIC;
     private String serialPort = "/dev/ttyACM0";
     private int sampleResolution = 4;
     private ScreenRegion region1 = ScreenRegion.LEFT;
@@ -34,13 +34,18 @@ public class Config
         LEFT, RIGHT, TOP, BOTTOM, FULL, DISABLED
     }
 
+    public enum Mode
+    {
+        DYNAMIC, MANUAL
+    }
+
     private static Properties prop = new Properties();
 
     public Config()
     {
         prop = readProperties(CONFIG_FILE);
 
-        this.mode = prop.getProperty(MODE_KEY);
+        this.mode = Mode.valueOf(prop.getProperty(MODE_KEY));
         this.serialPort = prop.getProperty(SERIAL_PORT_KEY);
         this.sampleResolution = Integer.parseInt(prop
             .getProperty(SAMPLE_RESOLUTION_KEY));
@@ -53,11 +58,11 @@ public class Config
         this.customBlueValue = Integer.parseInt(prop
             .getProperty(CUSTOM_BLUE_KEY));
 
-        System.out.println(MODE_KEY + "=" + this.mode);
+        System.out.println(MODE_KEY + "=" + this.mode.name());
         System.out.println(SERIAL_PORT_KEY + "=" + this.serialPort);
         System.out.println(SAMPLE_RESOLUTION_KEY + "=" + this.sampleResolution);
-        System.out.println(REGION_ONE_KEY + "=" + this.region1.toString());
-        System.out.println(REGION_TWO_KEY + "=" + this.region2.toString());
+        System.out.println(REGION_ONE_KEY + "=" + this.region1.name());
+        System.out.println(REGION_TWO_KEY + "=" + this.region2.name());
         System.out.println(CUSTOM_RED_KEY + "=" + this.customRedValue);
         System.out.println(CUSTOM_GREEN_KEY + "=" + this.customGreenValue);
         System.out.println(CUSTOM_BLUE_KEY + "=" + this.customBlueValue);
@@ -89,12 +94,12 @@ public class Config
     {
         try
         {
-            prop.setProperty(MODE_KEY, this.mode);
+            prop.setProperty(MODE_KEY, this.mode.name());
             prop.setProperty(SERIAL_PORT_KEY, this.serialPort);
             prop.setProperty(SAMPLE_RESOLUTION_KEY,
                 String.valueOf(this.sampleResolution));
-            prop.setProperty(REGION_ONE_KEY, this.region1.toString());
-            prop.setProperty(REGION_TWO_KEY, this.region2.toString());
+            prop.setProperty(REGION_ONE_KEY, this.region1.name());
+            prop.setProperty(REGION_TWO_KEY, this.region2.name());
             prop.setProperty(CUSTOM_RED_KEY,
                 String.valueOf(this.customRedValue));
             prop.setProperty(CUSTOM_GREEN_KEY,
@@ -112,7 +117,7 @@ public class Config
     }
 
     // getters
-    public String getMode()
+    public Mode getMode()
     {
         return mode;
     }
@@ -153,7 +158,7 @@ public class Config
     }
 
     // setters
-    public void setMode(String mode)
+    public void setMode(Mode mode)
     {
         this.mode = mode;
     }
