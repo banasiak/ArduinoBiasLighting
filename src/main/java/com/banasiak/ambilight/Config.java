@@ -16,6 +16,9 @@ public class Config
     private int sampleResolution = 4;
     private ScreenRegion region1 = ScreenRegion.LEFT;
     private ScreenRegion region2 = ScreenRegion.RIGHT;
+    private int redIntensity = 100;
+    private int greenIntensity = 100;
+    private int blueIntensity = 100;
     private int customRedValue = 127;
     private int customGreenValue = 127;
     private int customBlueValue = 127;
@@ -26,6 +29,9 @@ public class Config
     private static String SAMPLE_RESOLUTION_KEY = "sampleResolution";
     private static String REGION_ONE_KEY = "region1";
     private static String REGION_TWO_KEY = "region2";
+    private static String RED_INTENSITY_KEY = "redIntensity";
+    private static String GREEN_INTENSITY_KEY = "greenIntensity";
+    private static String BLUE_INTENSITY_KEY = "blueIntensity";
     private static String CUSTOM_RED_KEY = "customRed";
     private static String CUSTOM_GREEN_KEY = "customGreen";
     private static String CUSTOM_BLUE_KEY = "customBlue";
@@ -53,6 +59,9 @@ public class Config
             .getProperty(SAMPLE_RESOLUTION_KEY));
         this.region1 = ScreenRegion.valueOf(prop.getProperty(REGION_ONE_KEY));
         this.region2 = ScreenRegion.valueOf(prop.getProperty(REGION_TWO_KEY));
+        this.redIntensity = Integer.parseInt(prop.getProperty(RED_INTENSITY_KEY));
+        this.greenIntensity = Integer.parseInt(prop.getProperty(GREEN_INTENSITY_KEY));
+        this.blueIntensity = Integer.parseInt(prop.getProperty(BLUE_INTENSITY_KEY));
         this.customRedValue = Integer
             .parseInt(prop.getProperty(CUSTOM_RED_KEY));
         this.customGreenValue = Integer.parseInt(prop
@@ -69,6 +78,9 @@ public class Config
                 + this.sampleResolution);
             System.out.println(REGION_ONE_KEY + "=" + this.region1.name());
             System.out.println(REGION_TWO_KEY + "=" + this.region2.name());
+            System.out.println(RED_INTENSITY_KEY + "=" + this.redIntensity);
+            System.out.println(GREEN_INTENSITY_KEY + "=" + this.greenIntensity);
+            System.out.println(BLUE_INTENSITY_KEY + "=" + this.blueIntensity);
             System.out.println(CUSTOM_RED_KEY + "=" + this.customRedValue);
             System.out.println(CUSTOM_GREEN_KEY + "=" + this.customGreenValue);
             System.out.println(CUSTOM_BLUE_KEY + "=" + this.customBlueValue);
@@ -107,6 +119,9 @@ public class Config
             prop.setProperty(SERIAL_PORT_KEY, this.serialPort);
             prop.setProperty(SAMPLE_RESOLUTION_KEY,
                 String.valueOf(this.sampleResolution));
+            prop.setProperty(RED_INTENSITY_KEY, String.valueOf(this.redIntensity));
+            prop.setProperty(GREEN_INTENSITY_KEY, String.valueOf(this.greenIntensity));
+            prop.setProperty(BLUE_INTENSITY_KEY, String.valueOf(this.blueIntensity));
             prop.setProperty(REGION_ONE_KEY, this.region1.name());
             prop.setProperty(REGION_TWO_KEY, this.region2.name());
             prop.setProperty(CUSTOM_RED_KEY,
@@ -150,6 +165,21 @@ public class Config
     public ScreenRegion getRegion2()
     {
         return region2;
+    }
+
+    public int getRedIntensity()
+    {
+        return redIntensity;
+    }
+
+    public int getGreenIntensity()
+    {
+        return greenIntensity;
+    }
+
+    public int getBlueIntensity()
+    {
+        return blueIntensity;
     }
 
     public int getCustomRedValue()
@@ -196,6 +226,21 @@ public class Config
     public void setRegion2(ScreenRegion region2)
     {
         this.region2 = region2;
+    }
+
+    public void setRedIntensity(int redIntensity)
+    {
+        this.redIntensity = redIntensity;
+    }
+
+    public void setGreenIntensity(int greenIntensity)
+    {
+        this.greenIntensity = greenIntensity;
+    }
+
+    public void setBlueIntensity(int blueIntensity)
+    {
+        this.blueIntensity = blueIntensity;
     }
 
     public void setCustomRedValue(int customRedValue)

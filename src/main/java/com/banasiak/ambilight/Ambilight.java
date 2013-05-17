@@ -28,6 +28,10 @@ public class Ambilight
     private static BufferedReader input = null;
     private static OutputStream output = null;
 
+    private static double redIntensity = 100;
+    private static double greenIntensity = 100;
+    private static double blueIntensity = 100;
+
     static Config config = new Config();
 
     /**
@@ -38,6 +42,10 @@ public class Ambilight
         final ScreenRegion regionOne = config.getRegion1();
         final ScreenRegion regionTwo = config.getRegion2();
         final int sampleResolution = config.getSampleResolution();
+
+        redIntensity = config.getRedIntensity() / 100.0;
+        greenIntensity = config.getGreenIntensity() / 100.0;
+        blueIntensity = config.getBlueIntensity() / 100.0;
 
         if (!initializeSerialPort())
         {
@@ -88,15 +96,6 @@ public class Ambilight
                     regionTwoColor = new Color(red, green, blue);
                 }
 
-                if (config.getDebug())
-                {
-                    System.out.println("Region: " + regionOne.name()
-                        + " | Color: " + regionOneColor.toString());
-                    System.out.println("Region: " + regionTwo.name()
-                        + " | Color: " + regionTwoColor.toString());
-                    System.out.println("");
-                }
-
                 // write the appropriate region colors to the serial port
                 writeColorsToSerial(regionOneColor, regionTwoColor);
 
@@ -126,18 +125,37 @@ public class Ambilight
     private static void writeColorsToSerial(Color regionOneColor,
         Color regionTwoColor) throws IOException
     {
+        // adjust the colors according to the custom intensity specified in the config
+        final int red1 = (int) (regionOneColor.getRed() * redIntensity);
+        final int green1 = (int) (regionOneColor.getGreen() * greenIntensity);
+        final int blue1 = (int) (regionOneColor.getBlue() * blueIntensity);
+
+        final int red2 = (int) (regionTwoColor.getRed() * redIntensity);
+        final int green2 = (int) (regionTwoColor.getGreen() * greenIntensity);
+        final int blue2 = (int) (regionTwoColor.getBlue() * blueIntensity);
+
+        // write the final color to the console if debug is enabled
+        if (config.getDebug())
+        {
+            System.out.println("Region: " + config.getRegion1().name()
+                + " | Color: [r=" + red1 + ",g=" + green1 + ",b=" + blue1 + "]");
+            System.out.println("Region: " + config.getRegion2().name()
+                + " | Color: [r=" + red2 + ",g=" + green2 + ",b=" + blue2 + "]");
+            System.out.println("");
+        }
+
         // write marker for synchronization
         output.write(0xff);
 
         // RGB colors for left region
-        output.write(regionOneColor.getRed());
-        output.write(regionOneColor.getGreen());
-        output.write(regionOneColor.getBlue());
+        output.write(red1);
+        output.write(green1);
+        output.write(blue1);
 
         // RGB colors for right region
-        output.write(regionTwoColor.getRed());
-        output.write(regionTwoColor.getGreen());
-        output.write(regionTwoColor.getBlue());
+        output.write(red2);
+        output.write(green2);
+        output.write(blue2);
     }
 
     private static boolean initializeSerialPort()
