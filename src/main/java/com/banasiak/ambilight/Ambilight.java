@@ -18,6 +18,7 @@ import java.util.Enumeration;
 
 import com.banasiak.ambilight.Config.Mode;
 import com.banasiak.ambilight.Config.ScreenRegion;
+import com.banasiak.ambilight.input.SampleRectangle;
 
 public class Ambilight
 {
@@ -231,41 +232,7 @@ public class Ambilight
     private static Color sampleRectangle(final Robot robot, Rectangle region,
         int sampleResolution)
     {
-        int red = 0;
-        int green = 0;
-        int blue = 0;
-
-        // if the region rectangle is null, disable the LEDs by returning black
-        if (region == null)
-        {
-            return new Color(red, green, blue);
-        }
-
-        // otherwise, capture the screen region and sample the pixel colors
-        final BufferedImage grid = robot.createScreenCapture(region);
-        final Raster raster = grid.getData();
-        int rgbArray[] = null;
-
-        for (int x = 0; x < raster.getWidth(); x = x + sampleResolution)
-        {
-            for (int y = 0; y < raster.getHeight(); y = y + sampleResolution)
-            {
-                rgbArray = raster.getPixel(x, y, rgbArray);
-                red = red + rgbArray[0];
-                green = green + rgbArray[1];
-                blue = blue + rgbArray[2];
-            }
-        }
-
-        // average color while compensating for the sampling resolution
-        final int sampleArea = raster.getWidth() * raster.getHeight();
-        final int resolutionArea = sampleArea
-            / (sampleResolution * sampleResolution);
-
-        red = red / resolutionArea;
-        green = green / resolutionArea;
-        blue = blue / resolutionArea;
-
-        return new Color(red, green, blue);
+    	// preparing for object-oriented, one step at a time:
+    	return SampleRectangle.helperSampleRectangle(robot, region, sampleResolution);
     }
 }
