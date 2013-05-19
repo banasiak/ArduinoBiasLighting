@@ -1,5 +1,7 @@
 package com.banasiak.ambilight;
 
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -23,6 +25,7 @@ public class Config
     private int customGreenValue = 127;
     private int customBlueValue = 127;
     private boolean debug = false;
+    private int sleepMillis = 10;
 
     private static String MODE_KEY = "mode";
     private static String SERIAL_PORT_KEY = "serialPort";
@@ -36,10 +39,50 @@ public class Config
     private static String CUSTOM_GREEN_KEY = "customGreen";
     private static String CUSTOM_BLUE_KEY = "customBlue";
     private static String DEBUG_KEY = "debug";
+    private static String SLEEP_MILLIS_KEY = "sleepMillis";
 
     public enum ScreenRegion
     {
-        LEFT, RIGHT, TOP, BOTTOM, FULL, DISABLED
+        LEFT, RIGHT, TOP, BOTTOM, FULL, DISABLED;
+        public Rectangle createRectangle(Dimension screenDimension)
+        {
+        	return createRectangle(screenDimension, this);
+        }
+        private static Rectangle createRectangle(Dimension screenDimension, ScreenRegion region)
+        {
+        	final int width = (int) screenDimension.getWidth();
+        	final int height = (int) screenDimension.getHeight();
+        	final int halfWidth = width / 2;
+        	final int halfHeight = height / 2;
+        	
+        	Rectangle rectangle = null;
+        	
+        	switch (region)
+        	{
+        	case LEFT:
+        		rectangle = new Rectangle(0, 0, halfWidth, height);
+        		break;
+        	case RIGHT:
+        		rectangle = new Rectangle(halfWidth + 1, 0, halfWidth, height);
+        		break;
+        	case TOP:
+        		rectangle = new Rectangle(0, 0, width, halfHeight);
+        		break;
+        	case BOTTOM:
+        		rectangle = new Rectangle(0, halfHeight + 1, width, halfHeight);
+        		break;
+        	case FULL:
+        		rectangle = new Rectangle(0, 0, width, height);
+        		break;
+        	case DISABLED:
+        		rectangle = null;
+        		break;
+        		
+        	}
+        	
+        	return rectangle;
+        }
+        
     }
 
     public enum Mode
@@ -69,6 +112,7 @@ public class Config
         this.customBlueValue = Integer.parseInt(prop
             .getProperty(CUSTOM_BLUE_KEY));
         this.debug = Boolean.valueOf(prop.getProperty(DEBUG_KEY));
+        this.sleepMillis = Integer.parseInt(prop.getProperty(SLEEP_MILLIS_KEY));
 
         if (debug)
         {
@@ -85,6 +129,7 @@ public class Config
             System.out.println(CUSTOM_GREEN_KEY + "=" + this.customGreenValue);
             System.out.println(CUSTOM_BLUE_KEY + "=" + this.customBlueValue);
             System.out.println(DEBUG_KEY + "=" + this.debug);
+            System.out.println(SLEEP_MILLIS_KEY + "=" + this.sleepMillis);
             System.out.println("");
         }
     }
@@ -131,6 +176,7 @@ public class Config
             prop.setProperty(CUSTOM_BLUE_KEY,
                 String.valueOf(this.customBlueValue));
             prop.setProperty(DEBUG_KEY, String.valueOf(this.debug));
+            prop.setProperty(SLEEP_MILLIS_KEY, String.valueOf(this.sleepMillis));
 
             prop.store(new FileOutputStream(CONFIG_FILE), null);
         }
@@ -201,6 +247,11 @@ public class Config
     {
         return debug;
     }
+    
+    public int getSleepMillis()
+    {
+    	return sleepMillis;
+    }
 
     // setters
     public void setMode(Mode mode)
@@ -261,6 +312,11 @@ public class Config
     public void setDebug(boolean debug)
     {
         this.debug = debug;
+    }
+    
+    public void setSleepMillis(int millis)
+    {
+    	this.sleepMillis = millis;
     }
 
 }

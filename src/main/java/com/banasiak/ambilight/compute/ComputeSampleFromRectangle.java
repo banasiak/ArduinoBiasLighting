@@ -1,4 +1,4 @@
-package com.banasiak.ambilight.input;
+package com.banasiak.ambilight.compute;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -6,8 +6,8 @@ import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 
-public class SampleRectangle {
-	private static SampleRectangle singleton = new SampleRectangle();
+public class ComputeSampleFromRectangle {
+	private static ComputeSampleFromRectangle singleton = new ComputeSampleFromRectangle();
 	
 	public static Color helperSampleRectangle(final Robot robot, 
 			  							      Rectangle region,
@@ -17,7 +17,7 @@ public class SampleRectangle {
 	
 
 	private void debug(String s) {
-		// nothing
+		//System.out.println(s);
 	}
 	
 	private Color emptyInput = new Color(0, 0, 0); // i.e. all black
@@ -28,7 +28,7 @@ public class SampleRectangle {
 	
 	public  Color sampleRectangle(final Robot robot, 
 								  Rectangle region,
-								  final int sampleResolution) {
+								  final int sampleStepSize) {
 
 		// if the region rectangle is null, disable the LEDs by returning black
 		if (region == null) {
@@ -39,7 +39,7 @@ public class SampleRectangle {
 		final BufferedImage grid = robot.createScreenCapture(region);
 		final Raster raster = grid.getData();
 
-		return sampleRaster(raster, sampleResolution);
+		return sampleRaster(raster, sampleStepSize);
 	}
 	
 	public Color sampleRaster(Raster raster) {
@@ -57,39 +57,55 @@ public class SampleRectangle {
 			return emptyInput();
 		}
 		
-		long red = 0;
-		long green = 0;
-		long blue = 0;
-
+		long totalRed = 0;
+		long totalGreen = 0;
+		long totalBlue = 0;
+		int totalSampleCount = 0;
+		
 		int rgbArray[] = null;
-
+		int debugEvery = 9876;
+		int specials = 5;
+		
 		for (int x = 0; x < raster.getWidth(); x = x + sampleResolution) {
 			for (int y = 0; y < raster.getHeight(); y = y + sampleResolution) {
 				rgbArray = raster.getPixel(x, y, rgbArray);
-				red = red + rgbArray[0];
-				green = green + rgbArray[1];
-				blue = blue + rgbArray[2];
+				int red = rgbArray[0];
+				int green = rgbArray[1];
+				int blue = rgbArray[2];
+				
+				totalRed = totalRed + red;
+				totalGreen = totalGreen + green;
+				totalBlue = totalBlue + blue;
+				totalSampleCount++;
+				boolean every = (totalSampleCount % debugEvery) == 0;
+				boolean special = false;
+				if (specials > 0)
+				{
+					if ((x > 200) && (y > 200)) 
+					{
+						if ((red+green+blue) > 100)
+						{
+							special = true;
+							specials--;
+						}
+					}
+				}
+				boolean debug = every || special;
+				if (debug)
+				{
+					debug(((special) ? "###1### " : "") +
+							"[" + x + "," + y + "] pixel is " + "[r=" + rgbArray[0] + ",g=" + rgbArray[1] + ",b=" + rgbArray[2] + "]");
+				}
 			}
 		}
 
-		// TT: ok, this does not make much sense
-		// TT: "red" now contains the SUM of all the red RGB values
-		// TT: so,   red / totalNumberOfPixels  == red / totalArea    ==   average red  ...  good
-		// TT: but,  the formula below decreases the value of 'totalNumberOfPixels'
-		// TT:   i.e. it changes red/1000 into red/100 - i.e. things just get "more red"
-		// TT: wouldn't it be more straight-forward to have a tuple of
-		// TT:     (times-red, times-green, times-blue) to compensate to make it "more"???
+		debug("totalRed=" + totalRed + " totalGreen=" + totalGreen + " totalBlue=" + totalBlue + " totalSamples=" + totalSampleCount);
 		
-		// average color while compensating for the sampling resolution
-		final int totalArea = raster.getWidth() * raster.getHeight();
-		final int sampleArea = (sampleResolution * sampleResolution);
-		final int resolutionArea = totalArea / sampleArea;
-		debug("total=" + totalArea + " sample=" + sampleArea + " resolution=" + resolutionArea);
-		debug("red=" + red + " green=" + green + " blue=" + blue);
+		// average color = total color / total number of samples actually taken
 
-		int outRed   = ( (int) (red / resolutionArea));
-		int outGreen = ( (int) (green / resolutionArea));
-		int outBlue  = ( (int) (blue / resolutionArea));
+		int outRed   = ( (int) (totalRed / totalSampleCount));
+		int outGreen = ( (int) (totalGreen / totalSampleCount));
+		int outBlue  = ( (int) (totalBlue / totalSampleCount));
 
 		debug("outRed=" + outRed + " outGreen=" + outGreen + " outBlue=" + outBlue);
 		

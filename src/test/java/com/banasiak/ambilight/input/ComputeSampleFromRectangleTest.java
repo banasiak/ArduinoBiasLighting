@@ -1,6 +1,6 @@
 package com.banasiak.ambilight.input;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -12,14 +12,16 @@ import java.awt.image.WritableRaster;
 
 import org.junit.Test;
 
-public class SampleRectangleTest {
+import com.banasiak.ambilight.compute.ComputeSampleFromRectangle;
+
+public class ComputeSampleFromRectangleTest {
 
 	@Test
 	public void testJustRed() {
 		// given/when/then
 		
 		// given a rectangle with RGB(8, 0, 0) in every pixel
-		SampleRectangle compute = new SampleRectangle();
+		ComputeSampleFromRectangle compute = new ComputeSampleFromRectangle();
 		Raster raster = createFilledRaster(new Color(8, 0, 0));
 		
 		// when calling sample with sample size equal to the input size
@@ -34,7 +36,7 @@ public class SampleRectangleTest {
 	@Test
 	public void testJustReadSampleSize4() {
 		// given a rectangle with RGB(8, 0, 0) in every pixel
-		SampleRectangle compute = new SampleRectangle();
+		ComputeSampleFromRectangle compute = new ComputeSampleFromRectangle();
 		Raster raster = createFilledRaster(new Color(8, 0, 0));
 		
 		// when calling sample with sample size equal to the default configuration value of 4
@@ -43,8 +45,6 @@ public class SampleRectangleTest {
 		// then sample returns RGB(8, 0, 0)
 		Color expected = new Color(8, 0, 0);
 		
-		
-		/// This test fails, because actual is RGB(32, 0, 0) -- i.e. it is 4 times more red
 		assertEquals("filled color, sample size 4", expected, actual);		
 	}
 	
@@ -58,7 +58,7 @@ public class SampleRectangleTest {
 	}
 	
 	private void subtestAllSingleColorRectangles(final Color color) {
-		SampleRectangle compute = new SampleRectangle();
+		ComputeSampleFromRectangle compute = new ComputeSampleFromRectangle();
 		
 		// given a rectangle filled will a single color 
 		Raster raster = createFilledRaster(color);
