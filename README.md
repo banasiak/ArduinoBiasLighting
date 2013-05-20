@@ -7,6 +7,10 @@ A pure Java implementation of software to drive an Arduino-based "Ambilight" LED
 ####How It Works
 The software constantly samples the image on the screen and divides it into two regions (left/right).  It averages the pixel colors for each region and sends a serial command to the Arduino instructing it to change the color of two RGB LED strips attached to the back of the monitor (one on the left and another on the right).
 
+####Demo Videos
+* Test 1 - Static Colors:  http://www.youtube.com/watch?v=i2vxLTBGXME
+* Test 2 - Contrasting Channels:  http://www.youtube.com/watch?v=OUaGR0aM8Ps
+* Test 3 - Fast Action: http://www.youtube.com/watch?v=g6H-SKYLm7g
 
 ####Suggested Hardware
 * Arduino Uno Kit: http://www.amazon.com/gp/product/B0051QHPJM
