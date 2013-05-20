@@ -17,7 +17,7 @@ The software constantly samples the image on the screen and divides it into two 
 * RGB LED Strip (5 m): http://www.amazon.com/gp/product/B0085IXEYS
 * Diagnostic RGB LEDs (50 pcs): http://www.amazon.com/gp/product/B005VMDROS
 * Fancy Wire (10 m): http://www.amazon.com/gp/product/B009VD3EW8
-* Darlington Transistor: Array http://www.digikey.com/product-detail/en/ULN2003A/497-2344-5-ND/599603
+* Darlington Transistor Array: http://www.digikey.com/product-detail/en/ULN2003A/497-2344-5-ND/599603
 
 
 ####References
