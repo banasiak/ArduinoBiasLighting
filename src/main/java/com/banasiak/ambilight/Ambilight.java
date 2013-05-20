@@ -18,6 +18,7 @@ import com.banasiak.ambilight.sink.DebugFilter;
 import com.banasiak.ambilight.sink.IntensityAdjustFilter;
 import com.banasiak.ambilight.sink.NoOpSink;
 import com.banasiak.ambilight.sink.SerialPortSink;
+import com.banasiak.ambilight.sink.SerialPortSinkSoftTouch;
 import com.banasiak.ambilight.source.ConstantSource;
 import com.banasiak.ambilight.source.SampleRectangleSource;
 
@@ -48,13 +49,22 @@ public class Ambilight
     private static AmbilightSink getSerialPortSink() 
     {
     	final String portName = config.getSerialPort();
-    	try 
+    	boolean cantouch = SerialPortSinkSoftTouch.canTouchSerialPortSink(portName);
+    	if (cantouch) 
     	{
-    		return new SerialPortSink(portName);
-    	} 
-    	catch (AmbilightException e) 
+    		try 
+    		{
+    			return new SerialPortSink(portName);
+    		} 
+    		catch (AmbilightException e) 
+    		{
+    			System.err.println("Failed to initialize serial port(" + portName + ").  Skipping.");
+    			return new NoOpSink();
+    		}
+    	}
+    	else
     	{
-    		System.err.println("Failed to initialize serial port(" + portName + ").  Skipping.");
+    		System.err.println("Serial port library reported no .so/.dll available.  Skipping.");
     		return new NoOpSink();
     	}
     }
