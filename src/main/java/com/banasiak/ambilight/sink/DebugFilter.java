@@ -32,7 +32,7 @@ public class DebugFilter implements AmbilightSink
                 //+ " | Color: [r=" + red2 + ",g=" + green2 + ",b=" + blue2 + "]");
         out.println("");
 
-		return null;
+		return input;
 	}
 	private String dumpColor(Color color) 
 	{

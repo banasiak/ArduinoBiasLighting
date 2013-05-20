@@ -26,6 +26,7 @@ public class Config
     private int customBlueValue = 127;
     private boolean debug = false;
     private int sleepMillis = 10;
+    private boolean screenHistoryOutput = false;
 
     private static String MODE_KEY = "mode";
     private static String SERIAL_PORT_KEY = "serialPort";
@@ -40,6 +41,7 @@ public class Config
     private static String CUSTOM_BLUE_KEY = "customBlue";
     private static String DEBUG_KEY = "debug";
     private static String SLEEP_MILLIS_KEY = "sleepMillis";
+    private static String SCREEN_HISTORY_OUTPUT_KEY = "screenHistoryOutput";
 
     public enum ScreenRegion
     {
@@ -127,6 +129,7 @@ public class Config
             .getProperty(CUSTOM_BLUE_KEY));
         this.debug = Boolean.valueOf(prop.getProperty(DEBUG_KEY));
         this.sleepMillis = Integer.parseInt(prop.getProperty(SLEEP_MILLIS_KEY));
+        this.screenHistoryOutput = Boolean.valueOf(prop.getProperty(SCREEN_HISTORY_OUTPUT_KEY));
 
         if (debug)
         {
@@ -144,6 +147,7 @@ public class Config
             System.out.println(CUSTOM_BLUE_KEY + "=" + this.customBlueValue);
             System.out.println(DEBUG_KEY + "=" + this.debug);
             System.out.println(SLEEP_MILLIS_KEY + "=" + this.sleepMillis);
+            System.out.println(SCREEN_HISTORY_OUTPUT_KEY + "=" + this.screenHistoryOutput);
             System.out.println("");
         }
     }
@@ -191,6 +195,7 @@ public class Config
                 String.valueOf(this.customBlueValue));
             prop.setProperty(DEBUG_KEY, String.valueOf(this.debug));
             prop.setProperty(SLEEP_MILLIS_KEY, String.valueOf(this.sleepMillis));
+            prop.setProperty(SCREEN_HISTORY_OUTPUT_KEY, String.valueOf(this.screenHistoryOutput));
 
             prop.store(new FileOutputStream(CONFIG_FILE), null);
         }
@@ -261,6 +266,11 @@ public class Config
     {
         return debug;
     }
+    
+    public boolean getScreenHistoryOutput()
+    {
+    	return screenHistoryOutput;
+    }
 
     public int getSleepMillis()
     {
@@ -326,6 +336,11 @@ public class Config
     public void setDebug(boolean debug)
     {
         this.debug = debug;
+    }
+    
+    public void setScreenHistoryOutput(boolean showScreenHistory)
+    {
+    	this.screenHistoryOutput = showScreenHistory;
     }
 
     public void setSleepMillis(int millis)

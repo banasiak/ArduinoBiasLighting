@@ -17,6 +17,7 @@ import com.banasiak.ambilight.sink.AmbilightSinkContext;
 import com.banasiak.ambilight.sink.DebugFilter;
 import com.banasiak.ambilight.sink.IntensityAdjustFilter;
 import com.banasiak.ambilight.sink.NoOpSink;
+import com.banasiak.ambilight.sink.ScreenHistorySink;
 import com.banasiak.ambilight.sink.SerialPortSink;
 import com.banasiak.ambilight.sink.SerialPortSinkSoftTouch;
 import com.banasiak.ambilight.source.ConstantSource;
@@ -46,6 +47,17 @@ public class Ambilight
         return new IntensityAdjustFilter(redIntensity, greenIntensity, blueIntensity);
     }
     
+    private static AmbilightSink getScreenHistorySink()
+    {
+    	if (config.getScreenHistoryOutput()) 
+    	{
+    		return new ScreenHistorySink(100);
+    	}
+    	else
+    	{
+    		return new NoOpSink();
+    	}
+    }
     private static AmbilightSink getSerialPortSink() 
     {
     	final String portName = config.getSerialPort();
@@ -106,6 +118,7 @@ public class Ambilight
         AmbilightSink debugFilter = getDebugFilter();
         AmbilightSink intensityAdjustFilter = getIntensityAdjustFilter();
         AmbilightSink serialPortSink = getSerialPortSink();
+        AmbilightSink screenHistorySink = getScreenHistorySink(); 
 
         SampleRectangleSource sourceScreen = getSampleRectangleSource();
         ConstantSource sourceConstant = getConstantSource();
@@ -141,6 +154,7 @@ public class Ambilight
                 channelData = intensityAdjustFilter.accept(channelData, sinkContextProvider);
                 channelData = debugFilter.accept(channelData, sinkContextProvider);
                 channelData = serialPortSink.accept(channelData, sinkContextProvider);
+                channelData = screenHistorySink.accept(channelData, sinkContextProvider);
                 
                 // give the system a breather
                 Thread.sleep(config.getSleepMillis());
@@ -156,6 +170,14 @@ public class Ambilight
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        }
+        finally
+        {
+        	if (serialPortSink instanceof SerialPortSink)
+        	{
+        		SerialPortSink sps = (SerialPortSink) serialPortSink;
+        		sps.closeSerialPort();
+        	}
         }
     }
 }
