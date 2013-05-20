@@ -43,7 +43,7 @@ public class Config
 
     public enum ScreenRegion
     {
-        LEFT, RIGHT, TOP, BOTTOM, FULL, DISABLED;
+        LEFT, RIGHT, LEFT_THIRD, RIGHT_THIRD, TOP, BOTTOM, TOP_THIRD, BOTTOM_THIRD, FULL, DISABLED;
         public Rectangle createRectangle(Dimension screenDimension)
         {
         	return createRectangle(screenDimension, this);
@@ -54,35 +54,49 @@ public class Config
         	final int height = (int) screenDimension.getHeight();
         	final int halfWidth = width / 2;
         	final int halfHeight = height / 2;
-        	
+        	final int thirdWidth = width / 3;
+        	final int thirdHeight = height / 3;
+
         	Rectangle rectangle = null;
-        	
+
         	switch (region)
         	{
         	case LEFT:
         		rectangle = new Rectangle(0, 0, halfWidth, height);
         		break;
         	case RIGHT:
-        		rectangle = new Rectangle(halfWidth + 1, 0, halfWidth, height);
+        		rectangle = new Rectangle(halfWidth, 0, halfWidth, height);
         		break;
+        	case LEFT_THIRD:
+        	    rectangle = new Rectangle(0, 0, thirdWidth, height);
+        	    break;
+        	case RIGHT_THIRD:
+        	    rectangle = new Rectangle(thirdWidth*2, 0, thirdWidth, height);
+        	    break;
         	case TOP:
         		rectangle = new Rectangle(0, 0, width, halfHeight);
         		break;
         	case BOTTOM:
-        		rectangle = new Rectangle(0, halfHeight + 1, width, halfHeight);
+        		rectangle = new Rectangle(0, halfHeight, width, halfHeight);
         		break;
+        	case TOP_THIRD:
+        	    rectangle = new Rectangle(0, 0, width, thirdHeight);
+        	    break;
+        	case BOTTOM_THIRD:
+        	    rectangle = new Rectangle(0, thirdHeight*2, width, thirdHeight);
+        	    break;
         	case FULL:
         		rectangle = new Rectangle(0, 0, width, height);
         		break;
         	case DISABLED:
         		rectangle = null;
         		break;
-        		
+
         	}
-        	
+
         	return rectangle;
         }
-        
+
     }
 
     public enum Mode
@@ -247,7 +261,7 @@ public class Config
     {
         return debug;
     }
-    
+
     public int getSleepMillis()
     {
     	return sleepMillis;
@@ -313,7 +327,7 @@ public class Config
     {
         this.debug = debug;
     }
-    
+
     public void setSleepMillis(int millis)
     {
     	this.sleepMillis = millis;
