@@ -1,10 +1,6 @@
 package com.banasiak.ambilight;
 
-import java.awt.AWTException;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Robot;
-import java.awt.Toolkit;
 
 import com.banasiak.ambilight.Config.Mode;
 import com.banasiak.ambilight.Config.ScreenRegion;
@@ -96,15 +92,19 @@ public class Ambilight
         final ScreenRegion regionTwo = config.getRegion2();
         final int sampleStepSize = config.getSampleResolution();
 
-		try {
+		try
+		{
 	        // robot class for screen capturing
-			Robot robot = new Robot();
+			//Robot robot = new Robot();
 	        // get the screen size
-	        final Dimension screenDimension = Toolkit.getDefaultToolkit().getScreenSize();
-	 
-	        return new SampleRectangleSource(robot, screenDimension, regionOne, regionTwo, sampleStepSize);
+	        //final Dimension screenDimension = Toolkit.getDefaultToolkit().getScreenSize();
+	        //return new SampleRectangleSource(robot, screenDimension, regionOne, regionTwo, sampleStepSize);
 			
-		} catch (AWTException e) {
+	        return new SampleRectangleSource(new SampleRectangleSource.RobotRasterSource(), 
+	        		                         regionOne, regionTwo, sampleStepSize);
+			
+		}
+		catch (AmbilightException e) {
 			throw new AmbilightException("Failed to initialize screen sample source", e);
 		}
 

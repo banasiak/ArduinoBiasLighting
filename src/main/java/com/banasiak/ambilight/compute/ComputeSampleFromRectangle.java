@@ -24,8 +24,32 @@ public class ComputeSampleFromRectangle {
 	private Color emptyInput() {
 		return emptyInput;
 	}
+
+	public Color sampleRaster(Raster raster) {
+		if (raster == null) {
+			return emptyInput();
+		}
+		// see comments below why this doesn't work out -- i.e. it only works for square input regions
+		return sampleRaster(raster, Math.min(raster.getHeight(), raster.getWidth()));
+	}
 	
-	
+
+	public Color sampleRaster(final Raster raster, final Rectangle rectangle, final int sampleStepSize) 
+	{
+		return sampleRaster(subraster(raster, rectangle), sampleStepSize);
+	}
+	public Color sampleRaster(final BufferedImage grid, final Rectangle rectangle, final int sampleStepSize) 
+	{
+		return sampleRaster(subimage(grid, rectangle).getData(), sampleStepSize);
+	}
+	private static Raster subraster(final Raster raster, final Rectangle r)
+	{
+		return raster.createChild(r.x, r.y, r.width, r.height, 0, 0, null);
+	}
+	private static BufferedImage subimage(final BufferedImage image, final Rectangle r) 
+	{
+		return image.getSubimage(r.x, r.y, r.width, r.height);
+	}
 	public  Color sampleRectangle(final Robot robot, 
 								  Rectangle region,
 								  final int sampleStepSize) {
@@ -40,14 +64,6 @@ public class ComputeSampleFromRectangle {
 		final Raster raster = grid.getData();
 
 		return sampleRaster(raster, sampleStepSize);
-	}
-	
-	public Color sampleRaster(Raster raster) {
-		if (raster == null) {
-			return emptyInput();
-		}
-		// see comments below why this doesn't work out -- i.e. it only works for square input regions
-		return sampleRaster(raster, Math.min(raster.getHeight(), raster.getWidth()));
 	}
 	
 	public Color sampleRaster(Raster raster, 

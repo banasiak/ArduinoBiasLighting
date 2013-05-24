@@ -48,12 +48,21 @@ public class Config
         LEFT, RIGHT, LEFT_THIRD, RIGHT_THIRD, TOP, BOTTOM, TOP_THIRD, BOTTOM_THIRD, FULL, DISABLED;
         public Rectangle createRectangle(Dimension screenDimension)
         {
-        	return createRectangle(screenDimension, this);
+        	return cropRectangle(dimensionToRectangle(screenDimension), this);
         }
-        private static Rectangle createRectangle(Dimension screenDimension, ScreenRegion region)
+        public Rectangle createRectangle(Rectangle outerRectangle)
         {
-        	final int width = (int) screenDimension.getWidth();
-        	final int height = (int) screenDimension.getHeight();
+        	return cropRectangle(outerRectangle, this);
+        }
+        public static Rectangle dimensionToRectangle(Dimension dimension) {
+        	return new Rectangle(0, 0, dimension.width, dimension.height);
+        }
+        private static Rectangle cropRectangle(Rectangle outerRectangle, ScreenRegion region)
+        {
+        	final int xbias = outerRectangle.x;
+        	final int ybias = outerRectangle.y;
+        	final int width = (int) outerRectangle.getWidth();
+        	final int height = (int) outerRectangle.getHeight();
         	final int halfWidth = width / 2;
         	final int halfHeight = height / 2;
         	final int thirdWidth = width / 3;
@@ -61,34 +70,35 @@ public class Config
 
         	Rectangle rectangle = null;
 
+        	
         	switch (region)
         	{
         	case LEFT:
-        		rectangle = new Rectangle(0, 0, halfWidth, height);
+        		rectangle = new Rectangle(xbias + 0, ybias + 0,               halfWidth, height);
         		break;
         	case RIGHT:
-        		rectangle = new Rectangle(halfWidth, 0, halfWidth, height);
+        		rectangle = new Rectangle(xbias + halfWidth, ybias + 0,       halfWidth, height);
         		break;
         	case LEFT_THIRD:
-        	    rectangle = new Rectangle(0, 0, thirdWidth, height);
+        	    rectangle = new Rectangle(xbias + 0, ybias + 0,               thirdWidth, height);
         	    break;
         	case RIGHT_THIRD:
-        	    rectangle = new Rectangle(thirdWidth*2, 0, thirdWidth, height);
+        	    rectangle = new Rectangle(xbias + thirdWidth*2, ybias + 0,    thirdWidth, height);
         	    break;
         	case TOP:
-        		rectangle = new Rectangle(0, 0, width, halfHeight);
+        		rectangle = new Rectangle(xbias + 0, ybias + 0,               width, halfHeight);
         		break;
         	case BOTTOM:
-        		rectangle = new Rectangle(0, halfHeight, width, halfHeight);
+        		rectangle = new Rectangle(xbias + 0, ybias + halfHeight,      width, halfHeight);
         		break;
         	case TOP_THIRD:
-        	    rectangle = new Rectangle(0, 0, width, thirdHeight);
+        	    rectangle = new Rectangle(xbias + 0, ybias + 0,               width, thirdHeight);
         	    break;
         	case BOTTOM_THIRD:
-        	    rectangle = new Rectangle(0, thirdHeight*2, width, thirdHeight);
+        	    rectangle = new Rectangle(xbias + 0, ybias + thirdHeight*2,   width, thirdHeight);
         	    break;
         	case FULL:
-        		rectangle = new Rectangle(0, 0, width, height);
+        		rectangle = new Rectangle(xbias + 0, ybias + 0,               width, height);
         		break;
         	case DISABLED:
         		rectangle = null;
